@@ -4,7 +4,7 @@
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	</head>
 	<body>
-		<div class="rootDirectory">
+		<div class="rootDirectory" state="open">
 			<img src="assets/folder.open.png">
 			<span>Root Directory</span>
 
@@ -14,7 +14,7 @@
 	<script type="text/javascript">
 		var folderDictionary={};
 		var createFolderWithFileNameAndAddToDirectory=function(title,$tempDir) {
-			var html='<div class="folderClass" folderName="'+title+'" style="margin-left: 30px;position: relative;cursor:pointer"> <img src="assets/line.vertical.png" style="position: absolute;left: -20px;top: -1px;width: 1px;height: 18px;"><img src="assets/line.horizontal.png" style="position: absolute;width: 18px;left: -20px;top: 16px;height: 1px;"><img src="assets/folder.open.png"><span>'+title+'</span></div>'
+			var html='<div class="folderClass" folderName="'+title+'" style="margin-left: 30px;position: relative;cursor:pointer"> <img src="assets/line.vertical.png" style="position: absolute;left: -20px;top: -1px;width: 1px;height: 18px;"><img src="assets/line.horizontal.png" style="position: absolute;width: 18px;left: -20px;top: 16px;height: 1px;"><img src="assets/folder.png"><span>'+title+'</span></div>'
 			$tempDir.append(html);
 		};
 
@@ -27,12 +27,12 @@
 				success: function(resp) {
 					folderDictionary[folderName]=resp;
 					createSubTree(resp,$tempDir);
+					$tempDir.attr("state","open");
 				}
 			});
 		}
 
 		var createSubTree=function(resp,$tempDir){
-			debugger;
 			for (var i = 0; i < resp.length; i++) {
 				if(resp[i].indexOf(".")<0){
 					createFolderWithFileNameAndAddToDirectory(resp[i],$tempDir)
@@ -41,8 +41,18 @@
 		}
 
 		$('body').on("click",".folderClass",function(e){
-			var z=$(e.target).closest(".folderClass");
-			getDataForFolder(z.attr("folderName"),z);
+			var $z=$(e.target).closest(".folderClass");
+			if($z.attr("state")!="open" || $z.find('.folderClass').length==0 ){
+				if(typeof folderDictionary[$z.attr("folderName")]!="undefined"){
+					$z.find('.folderClass').slideDown(500);
+				}else {
+					getDataForFolder($z.attr("folderName"),$z);	
+				}
+			}else{
+				$z.find('.folderClass').slideUp(500);
+				$z.attr("state","closed");
+			}
+			
 		});
 
 		
