@@ -1,0 +1,59 @@
+<html>
+	<head>
+		<title>Explorer Tree</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<div class="rootDirectory">
+			<img src="assets/folder.open.png">
+			<span>Root Directory</span>
+
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		var folderDictionary={};
+		var createFolderWithFileNameAndAddToDirectory=function(title,$tempDir) {
+			var html='<div class="folderClass" folderName="'+title+'" style="margin-left: 30px;position: relative;cursor:pointer"> <img src="assets/line.vertical.png" style="position: absolute;left: -20px;top: -1px;width: 1px;height: 18px;"><img src="assets/line.horizontal.png" style="position: absolute;width: 18px;left: -20px;top: 16px;height: 1px;"><img src="assets/folder.open.png"><span>'+title+'</span></div>'
+			$tempDir.append(html);
+		};
+
+		var getDataForFolder=function(folderName,$tempDir) {
+			console.log(folderName)
+			$.ajax({
+				url:'http://127.0.0.1:8080/getContentsOfFolder',
+				data:{"folderName":folderName},
+				dataType: "jsonp",
+				success: function(resp) {
+					folderDictionary[folderName]=resp;
+					createSubTree(resp,$tempDir);
+				}
+			});
+		}
+
+		var createSubTree=function(resp,$tempDir){
+			debugger;
+			for (var i = 0; i < resp.length; i++) {
+				if(resp[i].indexOf(".")<0){
+					createFolderWithFileNameAndAddToDirectory(resp[i],$tempDir)
+				}
+			};
+		}
+
+		$('body').on("click",".folderClass",function(e){
+			var z=$(e.target).closest(".folderClass");
+			getDataForFolder(z.attr("folderName"),z);
+		});
+
+		
+		
+		$.ajax({
+			url:'http://127.0.0.1:8080/getContentsOfRootDirectory',
+			dataType: "jsonp",
+			success:function(resp){
+				folderDictionary["Root Directory"]=resp;
+				createSubTree(resp,$('.rootDirectory'));
+			}
+		})
+	</script>
+</html
